@@ -1,7 +1,7 @@
 const express = require('express');
 const name = require('../logger/logger')
 const date = require('../util/helper')
-const sentence = require('../validator/formatter')
+const line = require('../validator/formatter')
 var _ = require('lodash');
 
 const router = express.Router();
@@ -12,14 +12,17 @@ router.get('/test-me', function (req, res) {
 });
 
 router.get('/test-date', function (req, res) {
-    date.printDate()
-    date.printMonth()
+    
     date.getBatchInfo()
+    console.log('The date is: ', date.today)
+    console.log('The Month is: ', date.today.getMonth()+1)
     res.send('This shows date and month')
 });
 
 router.get('/test-letter', function (req, res) {
-    sentence.trim()
+    console.log(line.sentence.trim())
+    console.log(line.sentence.toUpperCase())
+    console.log(line.sentence.toLowerCase())
     res.send('This changes upper to lower case and viceversa')
 });
 
@@ -37,16 +40,8 @@ router.get('/hello', function (req, res) {
     const e = [5,67,12,12,9,7]
     console.log(_.union(a,b,c,d,e))
 
-    const fromPairs = ()=>{
-        const obj = {
-            horror:'The Shining',
-            drama: 'Titanic',
-            thriller: 'Shutter Island',
-            fantacy: 'Pans Labyrinth'
-        } 
-        return obj
-    }
-    console.log(fromPairs())
+    const arrObj = [['horror','The Shining'],['drama','Titanic'],['thriller','Shutter Island'],['fantasy','Pans Labyrinth']]
+    console.log("The converted object is: ",_.fromPairs(arrObj))
     res.send('Multiple functions called here')
 });
 
