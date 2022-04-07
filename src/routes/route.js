@@ -16,6 +16,7 @@ router.get('/test-date', function (req, res) {
     date.getBatchInfo()
     console.log('The date is: ', date.today)
     console.log('The Month is: ', date.today.getMonth()+1)
+    console.log(date.str)
     res.send('This shows date and month')
 });
 
