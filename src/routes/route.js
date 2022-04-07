@@ -61,5 +61,60 @@ router.get('/candidates', function (req, res) {
     res.send(arr2)
 });
 
+const movie = ['The Green Miles','The Avengers', 'Captain Phillips', 
+                'Sully', 'Brave Heart', 'Titanic', 'The Hobbits', 
+                'Star Wars', 'James Bond: 007']
 
+router.get('/movies', function (req, res) {
+    res.send(movie)
+});
+
+router.get('/movies/:indexNumber', function (req, res) {
+    let i = req.params.indexNumber
+    res.send((i <= movie.length && i > 0)?movie[i-1]:
+            `${'Invalid Request: Enter a number between 1 to'+" "+ movie.length}`)
+});
+
+const film = [ {
+                id: 1,
+                name: "The Avengers"
+                },{
+                id: 2,
+                name: "Shutter Island"    
+                },{
+                id: 3,
+                name: "The Conjuring"
+                },{
+                id: 4,
+                name: "The Shawshank Redemption"
+                },{
+                id: 5,
+                name: "The Godfather"
+                },{
+                id: 6,
+                name: "The Dark Knight"
+                },{
+                id: 7,
+                name: "12 Angry Men"
+                },{
+                id: 8,
+                name: "Schindler's List"
+                },{
+                id: 9,
+                name: "The Lord Of The Rings"
+                },{
+                id: 10,
+                name: "Star Wars"
+                }
+            ]
+
+router.get('/films', function (req, res) {
+    res.send(film)
+});
+
+router.get('/films/:filmId', function (req, res) {
+    let i = req.params.filmId
+    res.send((i > 0 && i <= film.length)?film[i-1]:
+            `${'Invalid Request: Enter a number between 1 to'+" "+ film.length}`)
+});
 module.exports = router;
