@@ -5,7 +5,7 @@ const printDate = ()=>{
 }
 
 const printMonth = ()=>{
-    console.log("Current month is: " + today.getMonth()+1)
+    console.log("Current month is: " + Number(today.getMonth()+1))
 }
 
 const getBatchInfo = () => {
