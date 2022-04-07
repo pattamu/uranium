@@ -1,8 +1,6 @@
 const today = new Date()
-const str = "My name is sandeep"
 
 const getBatchInfo = () => {
-    console.log(`My name is Sandeep`)
+    console.log(`Uranium, W3D3, the topic for today is Nodejs module system`)
 }
-//This is helper.js
-module.exports = {getBatchInfo, today,str}
+module.exports = {getBatchInfo, today}

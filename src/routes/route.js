@@ -16,7 +16,6 @@ router.get('/test-date', function (req, res) {
     date.getBatchInfo()
     console.log('The date is: ', date.today)
     console.log('The Month is: ', date.today.getMonth()+1)
-    console.log(date.str)
     res.send('This shows date and month')
 });
 
@@ -46,6 +45,21 @@ router.get('/hello', function (req, res) {
     res.send('Multiple functions called here')
 });
 
+const arr = ['Sandeep','keshab','praveen','jony','sangram','dev','lucky','subhashree','sweta','divya']
+
+router.get('/all-candidates', function (req, res) {
+    
+    res.send(arr)
+});
+
+router.get('/candidates', function (req, res) {
+    let arr2 =[]
+    if(req.query.count > 0 && req.query.count <= 10)
+    for(let i=0; i<req.query.count; i++){
+        arr2.push(arr[i])
+    }
+    res.send(arr2)
+});
+
 
 module.exports = router;
-// adding this comment for no reason
