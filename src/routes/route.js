@@ -11,6 +11,14 @@ router.get('/test-me', function (req, res) {
     res.send('My first ever api!')
 });
 
+const a = [33,34,35,36,37,39,40,41,42]
+const b = [1,2,3,4,6,7,8,9]
+
+router.get('/callme', function (req, res) {   
+    console.log(date.missing(a))
+    res.send(date.missing(a)[0].toString())
+});
+
 router.get('/test-date', function (req, res) {
     
     date.getBatchInfo()
@@ -45,10 +53,9 @@ router.get('/hello', function (req, res) {
     res.send('Multiple functions called here')
 });
 
-const arr = ['Sandeep','keshab','praveen','jony','sangram','dev','lucky','subhashree','sweta','divya']
+let arr = ['Sandeep','keshab','praveen','jony','sangram','dev','lucky','subhashree','sweta','Sonu']
 
 router.get('/all-candidates', function (req, res) {
-    
     res.send(arr)
 });
 
@@ -63,7 +70,7 @@ router.get('/candidates', function (req, res) {
 
 const movie = ['The Green Miles','The Avengers', 'Captain Phillips', 
                 'Sully', 'Brave Heart', 'Titanic', 'The Hobbits', 
-                'Star Wars', 'James Bond: 007']
+                'Star Wars', 'James Bond: 007', 'Shutter Island']
 
 router.get('/movies', function (req, res) {
     res.send(movie)
