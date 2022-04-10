@@ -60,4 +60,12 @@ const control3 = (req, res) => {
                 (players.push(req.body) && {players}) : {message: "Player '" + newName + "' already exist in the list"})
 }
 
-module.exports = {control, control2, control3}
+//The below version of the code chekcks the name even if some letters in the name have capital or small letter. Like in the list 'gopal'
+//is present, but if I try to add 'Gopal' or 'GOpal' or 'gopal', it'll still show that the player already exists.
+const control4 = (req, res) => {
+    const newName = req.body.name.toUpperCase()    
+    res.send(!players.some(x => x.name.toUpperCase() === newName) ? 
+                (players.push(req.body) && {players}) : {message: "Player '" + req.body.name + "' already exist in the list"})
+}
+
+module.exports = {control, control2, control3, control4}
