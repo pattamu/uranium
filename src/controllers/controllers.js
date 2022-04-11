@@ -35,12 +35,12 @@ const control = (req, res) => {
 }
 
 const control2 = (req, res) => {
-    const newName = req.body.name
+    const {name} = req.body
     let flag = false
     for(let i=0; i<players.length; i++){
-        if(players[i].name === newName){
+        if(players[i].name === name){
             flag = true
-            res.send({message: "Player '" + newName + "' already exist in the list"})
+            res.send({message: "Player '" + name + "' already exist in the list"})
         }
     }
     if(!flag){
@@ -58,6 +58,7 @@ const control3 = (req, res) => {
     
     res.send(!players.some(x => x.name === newName) ? 
                 (players.push(req.body) && {players}) : {message: "Player '" + newName + "' already exist in the list"})
+    console.log(req.body)
 }
 
 //The below version of the code chekcks the name even if some letters in the name have capital or small letter. Like in the list 'gopal'
@@ -68,4 +69,16 @@ const control4 = (req, res) => {
                 (players.push(req.body) && {players}) : {message: "Player '" + req.body.name + "' already exist in the list"})
 }
 
-module.exports = {control, control2, control3, control4}
+//The below version of the code will check if the name exist and if yes does it has gender property and if yes add the name if the gender 
+//is different. If gender property is not there then add the name only if the name doesn't exit in the list
+const control5 = (req, res) => {
+    const newName = req.body.name.toUpperCase()    
+    if(req.body.gender)
+    res.send(players.some(x => x.name.toUpperCase() === newName && x.gender.toUpperCase()  === req.body.gender.toUpperCase() ) ? 
+                {message: "Player '" + req.body.name + "' with similar gender already exist in the list"} : (players.push(req.body) && {players}) )
+    else
+    res.send(players.some(x => x.name.toUpperCase() === newName) ? 
+                {message: "Player '" + req.body.name + "' already exist in the list"} : (players.push(req.body) && {players}) )
+}
+
+module.exports = {control, control2, control3, control4, control5}
