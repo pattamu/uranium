@@ -21,7 +21,7 @@ const findBooks = async (req, res) => {
 }
 
 const findUpdate = async (req, res) => {
-    let a_id= await authorBookModel.findOneAndUpdate({name:req.body.name},{$set:{price:100}},{new:true})//findOneUpdate returns an object
+    let a_id= await authorBookModel.findOneAndUpdate({name:req.body.name},{$set:{price:150}},{new:true})//findOneAndUpdate returns an object
     console.log(a_id)
     let data= await authorModel.find({author_id: a_id.author_id}).select({author_name: 1, _id: 0})
     console.log(data)
@@ -29,15 +29,14 @@ const findUpdate = async (req, res) => {
 }
 
 const findRange = async (req,res) => {
-    let data = await (await authorBookModel.find( { price : { $gte: 50, $lte: 100} } ).select({ author_id :1, _id:0}))
-                    .map(x => x.author_id)
+    let data = (await authorBookModel.find({price:{$gte:50, $lte:200}}).select({author_id:1, _id:0})).map(x => x.author_id)
     let newDate = data.filter((item, index) => data.indexOf(item) === index)
-    let a_name = [] 
+    let a_name = []
     for(let i in newDate){
         a_name.push(...await authorModel.find({author_id: newDate[i]}).select({ author_name :1, _id:0})) //... is used bcz otherwise find() will return an array of elements
     }
     console.log(a_name)
-    res.send({msg: a_name}) //if ... is not used in line 37then you can use a_name.flat() for same result
+    res.send({msg: a_name}) //if ... is not used in line 36then you can use a_name.flat() for same result
 }
 
 module.exports = {createAuthor, createBook, findBooks, findUpdate, findRange}
