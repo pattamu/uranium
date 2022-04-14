@@ -30,10 +30,10 @@ const findUpdate = async (req, res) => {
 
 const findRange = async (req,res) => {
     let data = (await authorBookModel.find({price:{$gte:50, $lte:200}}).select({author_id:1, _id:0})).map(x => x.author_id)
-    let newDate = data.filter((item, index) => data.indexOf(item) === index)
+    let newData = data.filter((item, index) => data.indexOf(item) === index)
     let a_name = []
-    for(let i in newDate){
-        a_name.push(...await authorModel.find({author_id: newDate[i]}).select({ author_name :1, _id:0})) //... is used bcz otherwise find() will return an array of elements
+    for(let i in newData){
+        a_name.push(...await authorModel.find({author_id: newData[i]}).select({ author_name :1, _id:0})) //... is used bcz otherwise find() will return an array of elements
     }
     console.log(a_name)
     res.send({msg: a_name}) //if ... is not used in line 36then you can use a_name.flat() for same result
