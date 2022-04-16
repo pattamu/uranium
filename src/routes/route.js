@@ -8,6 +8,10 @@ router.post("/createAuthor", bookController.createAuthor)
 router.post("/createPublisher", bookController.createPublisher)
 router.post("/createBook", bookController.createBook)
 router.get("/findBook", bookController.findBook)
+router.put("/updateBook", bookController.updateBook)
+router.put("/updateBookPrice", bookController.updateBookPrice)
 
 module.exports = router;
+
+
 
