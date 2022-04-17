@@ -68,4 +68,21 @@ const updateBookPrice = async (req,res) => {
     res.send({msg: data})
 }
 
-module.exports = {createAuthor, createPublisher, createBook, findBook, updateBook, updateBookPrice}
+const updateB = async (req,res) => { //This is good method
+    // let a_filter = (await authorModel.find({rating: {$gt: 3.5}}).select("_id")).map(x => x._id)//This works as well but no need for the extra map and all
+    let a_filter = await authorModel.find({rating: {$gt: 3.5}})
+    await bookModel.updateMany({author: a_filter}, {$inc: {price: 10}})
+    let data = await bookModel.find()
+    res.send({msg: data})
+}
+
+// const updateB = async (req,res) => { //This is using for loop which is not so better when you can directly do it as above method of line 71
+//     let a_filter = (await authorModel.find({rating: {$gt: 3.5}}).select("_id")).map(x => x._id)
+//     for(let i=0; i< a_filter.length; i++){
+//         await bookModel.updateMany({author: a_filter[i]}, {$inc: {price: 10}})
+//     }
+//     let data = await bookModel.find()
+//     res.send({msg: data})
+// }
+
+module.exports = {createAuthor, createPublisher, createBook, findBook, updateBook, updateBookPrice, updateB}
