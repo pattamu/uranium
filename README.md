@@ -50,3 +50,9 @@ A newBook document should look like this. The author property is a reference to 
 		a) Add a new boolean attribute in the book schema called isHardCover with a default false value. For the books published by 'Penguin' and 'HarperCollins', update this key to true.
 		b) For the books written by authors having a rating greater than 3.5, update the books price by 10 (For eg if old price for such a book is 50, new will be 60) 
 
+IMPORTANT LINKS FOR REFERANCE
+-----------------------------
+https://www.mongodb.com/docs/manual/reference/method/ObjectId.valueOf/
+https://www.mongodb.com/docs/manual/reference/method/ObjectId.toString/
+https://www.geeksforgeeks.org/how-to-check-if-a-string-is-valid-mongodb-objectid-in-node-js/
+https://github.com/Automattic/mongoose/issues/1959

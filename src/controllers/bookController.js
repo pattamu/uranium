@@ -52,6 +52,8 @@ const findBook = async (req,res) => {
 }
 
 const updateBook = async (req,res) => {
+    // let find_PId = (await publisherModel.findOne({name: req.body.publisher}).select('_id'))._id.valueOf()
+    // console.log(find_PId) //The above 55 line will return the value of the object string and we can check that in 57 to get the same result
     let find_PId = await publisherModel.findOne({name: req.body.publisher}).select('_id')
     let data = await bookModel.updateMany(
                                         {publisher: find_PId},
@@ -72,7 +74,7 @@ const updateB = async (req,res) => { //This is good method
     // let a_filter = (await authorModel.find({rating: {$gt: 3.5}}).select("_id")).map(x => x._id)//This works as well but no need for the extra map and all
     let a_filter = await authorModel.find({rating: {$gt: 3.5}})
     await bookModel.updateMany({author: a_filter}, {$inc: {price: 10}})
-    let data = await bookModel.find()
+    let data = await bookModel.find({author:a_filter})
     res.send({msg: data})
 }
 
