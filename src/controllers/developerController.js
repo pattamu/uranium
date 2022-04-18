@@ -9,8 +9,8 @@ const createBatch = async (req, res) => {
 
 const createDeveloper = async (req, res) => {
     let data = req.body
-    if(!mongoose.isValidObjectId(req.body.batch)) return res.send({msg: "Invalid Batch ObjectId."})
     if(data.batch){
+        if(!mongoose.isValidObjectId(req.body.batch)) return res.send({msg: "Invalid Batch ObjectId."})
         let b_check = await mySchema.batch.find({_id: data.batch})
         if(b_check.length){
             if(!await mySchema.developer.exists(data)){ 
