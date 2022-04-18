@@ -1,19 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const developerController = require("../controllers/developerController")
 
-const bookController = require("../controllers/bookController")
-
-//Author-Publisher-Book route handlers
-router.post("/createAuthor", bookController.createAuthor)
-router.post("/createPublisher", bookController.createPublisher)
-router.post("/createBook", bookController.createBook)
-router.get("/findBook", bookController.findBook)
-router.put("/updateBook", bookController.updateBook)
-router.put("/updateBookPrice", bookController.updateBookPrice)
-router.put("/updateB", bookController.updateB)
+//Developer-Batch route handlers
+router.post("/batches", developerController.createBatch)
+router.post("/developers", developerController.createDeveloper)
+router.get("/scholarship-developers", developerController.scholarship_developers)
+router.get("/developers", developerController.getDeveloper)
 
 module.exports = router;
-
 
 
 
