@@ -1,4 +1,5 @@
 const mySchema = require("../models/schemas")
+const mongoose = require('mongoose');
 
 const createBatch = async (req, res) => {
     let data = req.body
@@ -8,18 +9,19 @@ const createBatch = async (req, res) => {
 
 const createDeveloper = async (req, res) => {
     let data = req.body
+    if(!mongoose.isValidObjectId(req.body.batch)) return res.send({msg: "Invalid Batch ObjectId."})
     if(data.batch){
         let b_check = await mySchema.batch.find({_id: data.batch})
         if(b_check.length){
-            if(!await mySchema.developer.exists(data)){
-                let savedData= await mySchema.developer.create(data)
+            if(!await mySchema.developer.exists(data)){ 
+                let savedData = await mySchema.developer.create(data)
                 res.send({msg: savedData})
             }
-            else res.send({msg: "This Develpoer already exists in our DB"})
+            else res.send({msg: "Develpoer already exists in our DB."})
         }
-        else res.send({msg: "The Batch ObjectId is Invalid."})
+        else res.send({msg: "Batch ObjectId doesn't belong to Batch collection."})
     }
-    else res.send({msg: "You must enter Batch ObjectId."})
+    else res.send({msg: "Must enter Batch ObjectId."})
 }
 
 const scholarship_developers = async(req, res) => {
@@ -35,4 +37,9 @@ const getDeveloper = async(req, res) => {
     else res.send({msg: "No Such Developers found in this Batch."})
 }
 
-module.exports = {createBatch, createDeveloper, scholarship_developers, getDeveloper}
+const ObjectIdCheck = async (req, res) => {
+    if(mongoose.isValidObjectId(req.body.oid)) return res.send({msg: "Valid ObjectId"})
+    res.send({msg: "Invalid ObjectId"})
+}
+module.exports = {createBatch, createDeveloper, scholarship_developers, getDeveloper, ObjectIdCheck}
+ 
