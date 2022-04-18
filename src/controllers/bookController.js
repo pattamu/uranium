@@ -1,4 +1,5 @@
 const mySchema = require("../models/schemas")
+const mongoose = require('mongoose');
 
 const createAuthor = async (req, res) => {
     let data= req.body
@@ -15,6 +16,8 @@ const createPublisher = async (req, res) => {
 const createBook = async (req,res) => {
     let data = req.body
     if(data.author && data.publisher){
+        if(!mongoose.isValidObjectId(req.body.author)) return res.send({msg: "Invalid Author ObjectId."})
+        if(!mongoose.isValidObjectId(req.body.publisher)) return res.send({msg: "Invalid Publisher ObjectId."})
         let a_check = await mySchema.author.find({_id: data.author}).select("_id")// find() returns an empty array if nothing is found
         let p_check = await mySchema.publisher.find({_id: data.publisher}).select("_id").lean()//.lean() is not necessery hence can be removed as well. Check internet for more details about .lean()
         if(!a_check.length && !p_check.length) //"!a_check.length" is same as "a_check.length === 0"
@@ -41,9 +44,9 @@ const findBook = async (req,res) => {
     // let data = await bookModel.find().populate(['author','publisher']) //This is more efficient as we can write all fields in an array
     let data = await mySchema.book.find().populate([
                             //{path:'author', select:'authorName'},
-                            {path: 'author', select:{age:0,_id:0, createdAt:0, updatedAt:0, __v:0}},//line 40 doesn't work if we select some keys to not to display
+                            {path: 'author', select:{age:0,_id:0, createdAt:0, updatedAt:0, __v:0}},//line 46 doesn't work if we select some keys to not to display
                             //{path:'publisher', select:'name'},
-                            {path: 'publisher', select:{_id:0, createdAt:0, updatedAt:0, __v:0}}//line 42 doesn't work if we select some keys to not to display
+                            {path: 'publisher', select:{_id:0, createdAt:0, updatedAt:0, __v:0}}//line 48 doesn't work if we select some keys to not to display
                             ]).select({_id:0, createdAt:0, updatedAt:0, __v:0})
                             //The above are some ways to filter populated data 
     res.send({msg: data})
@@ -51,7 +54,7 @@ const findBook = async (req,res) => {
 
 const updateBook = async (req,res) => {
     // let find_PId = (await publisherModel.findOne({name: req.body.publisher}).select('_id'))._id.valueOf()
-    // console.log(find_PId) //The above 55 line will return the value of the object string and we can check that in 57 to get the same result
+    // console.log(find_PId) //The above 56 line will return the value of the object string and we can check that in 58 to get the same result
     // let find_PId = await mySchema.publisher.findOne({name: req.body.publisher}).select('_id')//if we want to get the publisher name from req.body
     let find_PId = await mySchema.publisher.find({name: {$in:['Penguin','HarperCollins']}}).select('_id') //to directly choose between selected publishers
     console.log(find_PId)
