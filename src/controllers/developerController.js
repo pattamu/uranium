@@ -41,5 +41,5 @@ const ObjectIdCheck = async (req, res) => {
     if(mongoose.isValidObjectId(req.body.oid)) return res.send({msg: "Valid ObjectId"})
     res.send({msg: "Invalid ObjectId"})
 }
+
 module.exports = {createBatch, createDeveloper, scholarship_developers, getDeveloper, ObjectIdCheck}
- 
