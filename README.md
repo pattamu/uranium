@@ -1,32 +1,50 @@
 ASSIGNMENT  : ( Date: 18-04-22) 
 
-TOPIC: Mongoose Populate and Reference
+TOPIC: Middleware2
 
-For this assignment the session branch is session/populate-reference
-For the solution you have to create a new branch in your own repo- assignment/populate-reference2
-Try to use your own mongodb Atlas clusters to avoid sharing of collections and thus errors, please make sure you write the schema correctly. Use these collection names - developers, batches
-
-A batch document looks like this.
-{
-	_id: ObjectId("65321bfa4d9fe0d34da86829"),
-	name: “Uranium”,
-	size: 250,
-	program: “backend”
-}
-A developer document should look like this
+For this assignment you have to create a new branch - assignment/middleware2
+Your user document should look like this
 { 
-	_id: ObjectId("61951bfa4d9fe0d34da86829"),
-	name:"Sabiha Khan",
-	gender:”female”,
-	percentage:75,
-	batch: ObjectId("65321bfa4d9fe0d34da86829")
+    _id: ObjectId("61951bfa4d9fe0d34da86829"),
+    name: "Sabiha Khan",
+	balance:100, // Default balance at user registration is 100
+	address:"New delhi",
+	age: 90,
+ 	gender: “female” // Allowed values are - “male”, “female”, “other”
+	isFreeAppUser: false // Default false value.
 }
+Your product document should look like this
+{
+	_id: ObjectId("61951bfa4d9fe0d34da86344"),
+	name:"Catcher in the Rye",
+	category:"book",
+	price:70 //mandatory property
+}
+Your Order document looks like this.
 
-1. Write an api POST /batches that creates a batch from the details in the request body. Please note that the program should be an enum with the following allowed values only - backend and frontend
-2. Write an api POST  /developers that creates a developer from the details in the request body. Please note that the gender should be an enum with the following allowed values - male, female and other. Also, batch attribute is a reference to the batches collection.
+{
+	_id: ObjectId("61951bfa4d9fe0d34da86344"),
+	userId: “61951bfa4d9fe0d34da86829”,
+	productId: “61951bfa4d9fe0d34da86344”
+	amount: 0,
+	isFreeAppUser: true, 
+	date: “22/11/2021”
+}
+NOTE: In some of the below apis a header validation is to be performed (create user and create order). The name of the header is ‘isFreeAppUser’. Write a header validation that simply checks whether this header is present or not. Please note this validation should only be called in create user and create order apis. Perform this validation in a middleware.
 
-3. Write an api GET /scholarship-developers that fetches the list of eligible developers for scholarship. An eligible developer is female with percentage greater than or equal to 70
+1.Write a POST api to create a product from the product details in request body.
 
-4. Write an api GET /developers?percentage=value1&program=value2 that only returns the developers for a given program with a percentage greater than or equal to the received value. Please note the batch name and the program values are received in the request as query params.
+2.Write a POST api to create a user that takes user details from the request body. If the header isFreeAppUser is not present terminate the request response cycle with an error message that the request is missing a mandatory header
 
-For example GET /developers?percentage=55&program=radium should return all the developers from radium batch with a percentage greater than or equal to 55
+3.Write a POST api for order purchase that takes a userId and a productId in request body. If the header isFreeAppUser is not present terminate the request response cycle with an error message that the request is missing a mandatory header If the header is present the control goes to the request handler. Perform the user and product validation. Check if the user exists as well as whether the product exists. Return an error with a suitable error message if either of these validations fail For every purchase we save an order document in the orders collection. isFreeAppUser property in an Order document depends on the header isFreeAppUser. If the isFreeAppUser header is true then the balance of the user is not deducted and the amount in order is set to 0 as well the attribute in order isFreeAppUser is set to true. If this header has a false value then the product’s price is checked. This value is deducted from the user’s balance and the order amount is set to the product’s price as well as the attrbiute isFreeAppUser is set to false in order document.
+Update the logic in middleware to set the isFreeAppUser attribute in req. Use this attribute in the route handler for setting the isFreeAppUser attributes of User and Order collection.
+Hints for problem 3
+Validate the header in a middleware. Terminate the req-res cycle if this fails.
+Validate the userId. Send error if userId is invalid
+Validate the productId. Send the error if productId is invalid
+Now write the logic for order creation. 3 scenarios
+//Scenario 1 For paid user app and the user has sufficient balance. We deduct the balance from user's balance and update the user. We create an order document
+
+//Scenaio 2 For paid app user and the user has insufficient balance. We send an error that the user doesn't have enough balance
+
+//Scenario 3 For free app user, we dont check user's balance and create the order with 0 amount.
