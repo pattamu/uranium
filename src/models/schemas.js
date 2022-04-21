@@ -22,7 +22,6 @@ const orderSchema = new mongoose.Schema({
 	amount: Number,
 	isFreeAppUser: Boolean, 
 	date: {type: Date, default: Date.now(),}
-
 }, { timestamps: true });
 
 const user = mongoose.model('User', userSchema) 
