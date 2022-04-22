@@ -40,7 +40,7 @@ const updateDetails = async (req,res) => {
 const deleteUserData = async (req,res) => {
     let userDetails = await user.findById(req.params.userId)
     if(!userDetails) return res.send({msg: "User doesn't exist in DB."})
-    let updatedUser = await user.findOneAndUpdate({ _id: req.params.userId}, {isDeleted: false}, {new: true});
+    let updatedUser = await user.findOneAndUpdate({ _id: req.params.userId}, {isDeleted: true}, {new: true});
     res.send({update: true, data: updatedUser})
 }
 

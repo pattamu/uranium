@@ -11,8 +11,9 @@ const authCheck = async (req, res, next) => {
     if(tokenValidity.userId !== id) return res.send({msg: "This user hasn't been Authorised"}) 
     next()
     }
-    catch {
-        res.status(400).send({status: false, msg: 'invalid token, unable to verify session. Please re-log in.'}) 
+    catch(err){
+        console.log(err.message)
+        res.status(500).send({status: false, msg: 'invalid token, unable to verify session. Please re-log in.'}) 
     }
 }
 
