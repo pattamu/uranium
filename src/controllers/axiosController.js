@@ -21,14 +21,14 @@ const getWeatherdata = async (req, res) => {
         if(req.query.city){
             let fetch = {
                 method: 'get',
-                url: `http://api.openweathermap.org/data/2.5/weather?q=${req.query.city}&appid=e797d9bca8783a24db6c83527420eba4`
+                url: `http://api.openweathermap.org/data/2.5/weather?q=${req.query.city}&appid=${req.query.appId}`
             }
             let result = await axios(fetch)
             return res.status(200).send({Tempeature: result.data.main.temp})
         }
         let result = []
         for(let i in cities){
-            let fetch = `http://api.openweathermap.org/data/2.5/weather?q=${cities[i]}&appid=e797d9bca8783a24db6c83527420eba4`
+            let fetch = `http://api.openweathermap.org/data/2.5/weather?q=${cities[i]}&appid=${req.query.appId}`
             let val = (await axios.get(fetch)).data.main
             result.push({city: cities[i], temp: val.temp})
         }
