@@ -17,7 +17,7 @@ const getVaccSessions = async (req, res) => {
 
 const getWeatherdata = async (req, res) => {
     try{
-        let cities =  ["Bengaluru","Mumbai", "Delhi", "Kolkata", "Chennai", "London", "Moscow"]
+        let cities =  req.body.cities || ["Bengaluru","Mumbai", "Delhi", "Kolkata", "Chennai", "London", "Moscow"]
         if(req.query.city){
             let fetch = {
                 method: 'get',
