@@ -3,7 +3,19 @@ const {author, blog} = require("../models/schemas")
 //createAuthor API by Sandeep
 const createAuthor = async (req,res) => {
     try{
+        /*************************************VALIDATION*******************************************/
         let data = req.body
+        if(!Object.keys(data).length) return res.status(400).status(406).send({status: false, msg: "You must enter data."})
+
+        if(!data.fname.match(/^[a-zA-Z]+$/)) // REGEX using .match()
+        return res.status(422).send({status: false, msg: "Enter a valid First name."})
+        
+        if(!(/^[a-zA-Z]+$/.test(data.lname))) // REGEX using .test()
+        return res.status(422).send({status: false, msg: "Enter a valid Last name."})
+
+        if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email)))
+        return res.status(422).send({status: false, msg: "Enter a valid email address."})
+        /*******************************************************************************************/
         let created = await author.create(data)
         res.status(201).send({status: true, data: created})
     }
@@ -16,7 +28,12 @@ const createAuthor = async (req,res) => {
 //createBlog API by Sandeep
 const createBlogs = async (req,res) => {
     try{
+        /*************************************VALIDATION*******************************************/
         let data = req.body
+        if(!Object.keys(data).length) return res.status(400).send({status: false, msg: "You must enter data."})
+
+        if(!data.authorId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))
+        return res.send({status: false, msg: "Please enter a valid Author ObjectId."})
         /**********************Authentication Check************************/
         if(req.headers['valid_author'] != data.authorId)
         return res.status(401).send({status: false, msg: "Enter your own AuthorId."})
@@ -35,11 +52,18 @@ const createBlogs = async (req,res) => {
 //getBlog API by Sandeep
 const getBlogs = async (req,res) => {
     try{
-        if(!req.query) return res.status(404).send({status:false, msg: "Filter condition is empty."})
+        if(req.query.title && !req.query.body) delete req.query.title
+        else if(req.query.body && !req.query.title) delete req.query.body
+        else if(req.query.title && req.query.body){
+            delete req.query.title
+            delete req.query.body
+        }
+        if(!Object.keys(req.query).length) 
+        return res.status(403).send({status: false, msg: "No filters applied or apply filters apart from 'title' and 'body'."})
         req.query.isDeleted = false
         req.query.isPublished = true
         let filter = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])
-        //line 40 - filter is used to get all blog datas of the logged in user only
+        //line 65 - filter is used to get all blog datas of the logged in user only
         if(!filter.length)
         return res.status(404).send({status: false, msg: "No such documents found"})
         res.status(200).send({status: true, data: filter})
@@ -53,7 +77,12 @@ const getBlogs = async (req,res) => {
 //updateBlogs API by Sandeep
 const updateBlogs = async (req,res) => {
     try{
-        if(!req.body) return res.status(406).send({status: false, msg: "No data provided to update."})
+        /*********************************************VALIDATION**********************************************/
+        if(!Object.keys(req.body).length) return res.status(406).send({status: false, msg: "No data provided to update."})
+
+        if(!req.params.blogId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))
+        return res.send({status: false, msg: "Send a valid Blog ObjectId in params."})
+
         let findBlog = await blog.findOne({_id:req.params.blogId, isDeleted: false})
         if(!findBlog)
         return res.status(404).send({status: false, msg: "No such documents found"})
@@ -63,7 +92,9 @@ const updateBlogs = async (req,res) => {
         /*********************************************************************************/
         let {title, body, tags, subcategory} = req.body
         let updatedblog = await blog.findOneAndUpdate({_id: req.params.blogId},
-                                                    {$push: {tags: tags, subcategory:subcategory},
+                                                    // {$push: {tags: tags, subcategory:subcategory},//$push will push the element to array
+                                                    {$addToSet: {tags: {$each:tags||[]},subcategory:{$each:subcategory||[]}},
+                                                    //$set will push only unique elements and won't push element if already exists
                                                     title: title, body: body,
                                                     publishedAt: Date.now(),
                                                     isPublished: true},
@@ -79,6 +110,9 @@ const updateBlogs = async (req,res) => {
 //deleteblogs by paramId by Sandeep
 const deleteBlogs = async (req,res) => {
     try{
+        /*************************************VALIDATION*******************************************/
+        if(!req.params.blogId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))
+        return res.send({status: false, msg: "Send a valid Blog ObjectId in params."})
         /******************************Authentication Check*****************************/
         let authCheck = await blog.findById(req.params.blogId)
         if(authCheck.authorId != req.headers['valid_author'])
@@ -96,6 +130,9 @@ const deleteBlogs = async (req,res) => {
 
 const deleteBlogsQP = async (req,res) => {
     try{
+        /****************************VALIDATION*************************/
+        if(!Object.keys(req.query).length) 
+        return res.status(406).send({status: false, msg: "Please select some filters for deletion."})
         /******************************Authentication Check*****************************/
         req.query.isPublished = false
         let findBlogs = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])
@@ -113,7 +150,7 @@ const deleteBlogsQP = async (req,res) => {
     }
 }
 
-/**********************The below code can be used without authentication*********************/
+/**********************The below code can be used when authentication is not needed*********************/
 
 //deleteblogs by queryParams by Sandeep
 // const deleteBlogsQP = async (req,res) => {
