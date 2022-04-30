@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 
 const createAuthor = async (req,res) => {
     try{
-        /*************************************VALIDATION*******************************************/
+        /************************************VALIDATION***************************************/
         let data = req.body
         if(!Object.keys(data).length) 
             return res.status(400).send({status: false, msg: "You must enter data."})
@@ -16,7 +16,7 @@ const createAuthor = async (req,res) => {
 
         if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email.trim())))
             return res.status(400).send({status: false, msg: "Enter a valid email address."})
-        /*******************************************************************************************/
+        /***************************************************************************************/
         let created = await author.create(data)
         res.status(201).send({status: true, data: created})
     }
@@ -66,7 +66,7 @@ const getBlogs = async (req,res) => {
             delete req.query.title
             delete req.query.body
         }
-        // if(!Object.keys(req.query).length)//suppose it's asked that no blogs should be displyed in case no filter is applied, then use 64 &65 line
+        // if(!Object.keys(req.query).length)//suppose it's asked that no blogs should be displyed in case no filter is applied, then use 69 & 70 line
         //     return res.status(400).send({status: false, msg: "No filters applied or apply filters apart from 'title' and 'body'."})
         if(!Object.keys(req.query).length) {
             let filter = await blog.find({isDeleted: false, isPublished: true})
@@ -98,10 +98,10 @@ const updateBlogs = async (req,res) => {
         let findBlog = await blog.findOne({_id:req.params.blogId, isDeleted: false})
         if(!findBlog)
             return res.status(404).send({status: false, msg: "No such documents found"})
-        /******************************Authentication Check*****************************/
+        /***********************************Authentication Check**********************************/
         if(req.headers['valid_author'] != findBlog.authorId)
             return res.status(401).send({status: false, msg: "You don't have permission to update this Blog."})
-        /*********************************************************************************/
+        /*****************************************************************************************/
         let {title, body, tags, subcategory} = req.body
         let updatedblog = await blog.findOneAndUpdate({_id: req.params.blogId, isDeleted: false},
                                                     // {$push: {tags: tags, subcategory:subcategory},//$push will push the element to array
@@ -125,11 +125,11 @@ const deleteBlogs = async (req,res) => {
         if(!mongoose.isValidObjectId(req.params.blogId))
         // if(!req.params.blogId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))//Can also check Object Id Validation using REGEX 
             return res.status(400).send({status: false, msg: "Send a valid Blog ObjectId in params."})
-        /******************************Authentication Check*****************************/
+        /************************************Authentication Check***********************************/
         let authCheck = await blog.findById(req.params.blogId)
         if(authCheck.authorId != req.headers['valid_author'])
             return res.status(401).send({status: false, msg: "You don't have authority to delete this Blog."})
-        /*********************************************************************************/
+        /********************************************************************************************/
         if(!await blog.findOneAndUpdate({_id:req.params.blogId, isDeleted: false},{isDeleted: true}))
             return res.status(404).send({status: false,data: "No document found"})
         res.status(200).end()
@@ -142,16 +142,16 @@ const deleteBlogs = async (req,res) => {
 
 const deleteBlogsQP = async (req,res) => {
     try{
-        /****************************VALIDATION*************************/
+        /****************************************VALIDATION****************************************/
         if(!Object.keys(req.query).length) 
             return res.status(400).send({status: false, msg: "Please select some filters for deletion."})
-        /******************************Authentication Check*****************************/
+        /**************************************Authentication Check***********************************/
         // req.query.isPublished = false
         let findBlogs = await blog.find({$and: [req.query,{authorId: req.headers['Author-login']},{isPublished: false}]})//<---Authorization--->
         // let findBlogs = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])
         // line 143 - we can also use filter to get all blog datas of the logged in user
         if(!findBlogs.length) return res.status(404).send({status: false, msg: "No document found"})
-        /*********************************************************************************/
+        /*********************************************************************************************/
         let blogs = await blog.updateMany({_id:findBlogs},{$set:{isDeleted: true}})
         if(blogs.matchedCount == 0)
             return res.status(404).send({status: false,data: "No document found"})

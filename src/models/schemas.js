@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId
-// const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 const authorSchema = mongoose.Schema({ 
     fname: { type: String, required: true, trim: true}, 
@@ -35,14 +35,34 @@ const blogSchema = mongoose.Schema({
     deletedAt: {type: Date}
 }, { timestamps: true })
 
+const generateAuthToken = (loginData) => {   
+    const token = jwt.sign(
+                            {authorId:loginData._id,
+                            authorName: `${loginData.fname}  ${loginData.lname}` },
+                            'Which came first, The Egg or the Chicken ??!')
+    // res.setHeader("x-api-key", token)
+    // res.status(200).send({status: true, data: "Token Successfully sent to Header."});
+    return token
+}
+
+/*in authentication.js if line 10 is used then uncomment this below function & line 67 to generate token 
+and comment above function from line 38-46 & line 66*/
+
 // authorSchema.methods.generateAuthToken = async function() {
 //     const User = this    
-//     const token = jwt.sign({_id:User._id, authorName: `${User.fname}  ${User.lname}` },'author')
+//     const token = jwt.sign({authorId:User._id, 
+//                             authorName: `${User.fname}  ${User.lname}` },
+//                             'Which came first, The Egg or the Chicken ??!')
 //     return token
 // }
+
+const decodeAuthToken = (token) => {   
+    return tokenValidity = jwt.verify(token, "Which came first, The Egg or the Chicken ??!")
+}
 
 const author = mongoose.model('Author', authorSchema) //authors
 const blog = mongoose.model('Blog', blogSchema) //blogs
 
-module.exports = {author, blog}
+module.exports = {author, blog, generateAuthToken, decodeAuthToken}
+// module.exports = {author, blog, decodeAuthToken}
 
