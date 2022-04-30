@@ -5,10 +5,10 @@ const createAuthor = async (req,res) => {
     try{
         /*************************************VALIDATION*******************************************/
         let data = req.body
-        if(!Object.keys(data).length) return res.status(400).send({status: false, msg: "You must enter data."})
+        if(!Object.keys(data).length) 
+            return res.status(400).send({status: false, msg: "You must enter data."})
         
-        if(!mongoose.isValidObjectId(data.authorId))
-        // if(!data.fname.trim().match(/^[a-zA-Z]+$/)) // REGEX using .match() --> we can check Object Id using this REGEX as well
+        if(!data.fname.trim().match(/^[a-zA-Z]+$/)) // REGEX using .match() --> we can check Object Id using this REGEX as well
             return res.status(400).send({status: false, msg: "Enter a valid First name."})
         
         if(!(/^[a-zA-Z]+$/.test(data.lname.trim()))) // REGEX using .test()
@@ -39,6 +39,14 @@ const createBlogs = async (req,res) => {
         if(req.headers['valid_author'] != data.authorId)
             return res.status(401).send({status: false, msg: "Enter your own AuthorId."})
         /*******************************************************************************/
+        data.tags = [...new Set(data.tags)]
+        data.subcategory = [...new Set(data.subcategory)]
+        if(data.isPublished){
+            data.publishedAt = Date.now()
+        }
+        if(data.isDeleted){
+            data.deletedAt = Date.now()
+        }
         if(!await author.findById(req.body.authorId)) 
             return res.status(400).send({status: false, msg: "AuthorId is not valid"})
         let created = await blog.create(data)
@@ -61,14 +69,14 @@ const getBlogs = async (req,res) => {
         // if(!Object.keys(req.query).length)//suppose it's asked that no blogs should be displyed in case no filter is applied, then use 64 &65 line
         //     return res.status(400).send({status: false, msg: "No filters applied or apply filters apart from 'title' and 'body'."})
         if(!Object.keys(req.query).length) {
-            let filter = await blog.find()
+            let filter = await blog.find({isDeleted: false, isPublished: true})
             return res.status(200).send({status: true, data: filter})
         }
         req.query.isDeleted = false
         req.query.isPublished = true
         let filter = await blog.find({$and: [req.query,{authorId: req.headers['Author-login']}]})//<---Authorization--->
         // let filter = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])//<---Authorization--->
-        // line 70 - we can also use filter to get all blog datas of the logged in user
+        // line 78 - we can also use filter to get all blog datas of the logged in user
         if(!filter.length)
             return res.status(404).send({status: false, msg: "No such documents found"})
         res.status(200).send({status: true, data: filter})
@@ -92,10 +100,10 @@ const updateBlogs = async (req,res) => {
             return res.status(404).send({status: false, msg: "No such documents found"})
         /******************************Authentication Check*****************************/
         if(req.headers['valid_author'] != findBlog.authorId)
-            return res.status(401).send({status: false, msg: "You can't update this Blog."})
+            return res.status(401).send({status: false, msg: "You don't have permission to update this Blog."})
         /*********************************************************************************/
         let {title, body, tags, subcategory} = req.body
-        let updatedblog = await blog.findOneAndUpdate({_id: req.params.blogId},
+        let updatedblog = await blog.findOneAndUpdate({_id: req.params.blogId, isDeleted: false},
                                                     // {$push: {tags: tags, subcategory:subcategory},//$push will push the element to array
                                                     {$addToSet: {tags: {$each:tags||[]},subcategory:{$each:subcategory||[]}},
                                                     //$set will push only unique elements and won't push element if already exists
