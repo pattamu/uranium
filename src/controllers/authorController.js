@@ -68,7 +68,7 @@ const getBlogs = async (req,res) => {
         req.query.isPublished = true
         let filter = await blog.find({$and: [req.query,{authorId: req.headers['Author-login']}]})//<---Authorization--->
         // let filter = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])//<---Authorization--->
-        //line 70 - we can also use filter to get all blog datas of the logged in user
+        // line 70 - we can also use filter to get all blog datas of the logged in user
         if(!filter.length)
             return res.status(404).send({status: false, msg: "No such documents found"})
         res.status(200).send({status: true, data: filter})
@@ -141,6 +141,7 @@ const deleteBlogsQP = async (req,res) => {
         // req.query.isPublished = false
         let findBlogs = await blog.find({$and: [req.query,{authorId: req.headers['Author-login']},{isPublished: false}]})//<---Authorization--->
         // let findBlogs = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])
+        // line 143 - we can also use filter to get all blog datas of the logged in user
         if(!findBlogs.length) return res.status(404).send({status: false, msg: "No document found"})
         /*********************************************************************************/
         let blogs = await blog.updateMany({_id:findBlogs},{$set:{isDeleted: true}})
