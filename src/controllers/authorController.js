@@ -32,23 +32,34 @@ const createBlogs = async (req,res) => {
         let data = req.body
         if(!Object.keys(data).length) 
             return res.status(400).send({status: false, msg: "You must enter data."})
+        if(!Object.keys(data).length) 
+            return res.status(400).send({status: false, msg: "You must enter data to create a Blog."})
+        if(!data.title)
+            return res.status(400).send({status: false, msg: "Title must be present."})
+        if(!data.body)
+            return res.status(400).send({status: false, msg: "Body must be present."})
+        if(!data.authorId)
+            return res.status(400).send({status: false, msg: "AuthorId must be present."})
+        if(!data.category)
+            return res.status(400).send({status: false, msg: "Category must be present."})
         if(!mongoose.isValidObjectId(data.authorId))
-        // if(!data.authorId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))//can check ObjectId using this REGEX as well
+        // if(!data.authorId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))
+        // we can check ObjectId using this REGEX as well which is shown in line 46. comment line 45 and uncomment line 46 to check.
             return res.send({status: false, msg: "Invalid Author ObjectId."})
         if(!await author.findById(req.body.authorId)) 
-            return res.status(400).send({status: false, msg: "AuthorId is not valid."})
+            return res.status(400).send({status: false, msg: "AuthorId doesn't present in our DB."})
         /****************************Authentication Check******************************/
         if(req.headers['valid_author'] != data.authorId)
-            return res.status(401).send({status: false, msg: "Enter your own AuthorId."})
+            return res.status(401).send({status: false, msg: "Enter your own AuthorId to create a blog."})
         /*******************************************************************************/
         data.tags = [...new Set(data.tags)]
         data.subcategory = [...new Set(data.subcategory)]
-        if(data.isPublished){
+        if(data.isPublished)
             data.publishedAt = Date.now()
-        }
-        if(data.isDeleted){
+        if(data.isDeleted)
             data.deletedAt = Date.now()
-        }
+        if(await blog.exists(data)) 
+            return res.status(400).send({status: false, msg: "Blog already present"})
         let created = await blog.create(data)
         res.status(201).send({status: true, data: created})
     }
@@ -60,26 +71,25 @@ const createBlogs = async (req,res) => {
 
 const getBlogs = async (req,res) => {
     try{
-        if(req.query.title && !req.query.body) delete req.query.title
-        else if(req.query.body && !req.query.title) delete req.query.body
-        else if(req.query.title && req.query.body){
-            delete req.query.title
-            delete req.query.body
+        let tags; let subcategory;
+        if(req.query.tags)
+            tags = (req.query.tags.split(/[, '"+-;]+/)).map(x => x.trim()).map(x => {return {tags:x}})
+        if(req.query.subcategory)
+            subcategory = (req.query.subcategory.split(/[, '"+-;]+/)).map(x => x.trim()).map(x => {return {subcategory:x}})
+        //---> REGEX --> '/[, ]+/' --> this will split the string by space as well as comma
+        //---> REGEX --> '/[, '"+-;]+/' --> this will split the string by space,comma and aslo (' " + - ;)
+
+        let total = [...tags||[],...subcategory||[],{title:req.query.title||''},{body:req.query.body||''}, 
+                    {authorId:req.query.authorId||null},{category:req.query.category||''}]
+        console.log(total)
+        if(!Object.keys(req.query).length){
+            let blogs = await blog.find({isDeleted: false, isPublished: true},{createdAt:0,updatedAt:0,__v:0})
+            return res.status(200).send({status:true, data:blogs})
         }
-        // if(!Object.keys(req.query).length)//suppose it's asked that no blogs should be displyed in case no filter is applied, then use 69 & 70 line
-        //     return res.status(400).send({status: false, msg: "No filters applied or apply filters apart from 'title' and 'body'."})
-        if(!Object.keys(req.query).length) {
-            let filter = await blog.find({isDeleted: false, isPublished: true})
-            return res.status(200).send({status: true, data: filter})
-        }
-        req.query.isDeleted = false
-        req.query.isPublished = true
-        let filter = await blog.find({$and: [req.query,{authorId: req.headers['Author-login']}]})//<---Authorization--->
-        // let filter = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])//<---Authorization--->
-        // line 78 - we can also use filter to get all blog datas of the logged in user
-        if(!filter.length)
+        let blogs = await blog.find({$or:total, isDeleted: false, isPublished: true},{createdAt:0,updatedAt:0,__v:0})
+        if(!blogs.length)
             return res.status(404).send({status: false, msg: "No such documents found"})
-        res.status(200).send({status: true, data: filter})
+        res.status(200).send({status: true, data: blogs})
     }
     catch(err){
         console.log(err.message)
@@ -130,7 +140,7 @@ const deleteBlogs = async (req,res) => {
         if(authCheck.authorId != req.headers['valid_author'])
             return res.status(401).send({status: false, msg: "You don't have authority to delete this Blog."})
         /********************************************************************************************/
-        if(!await blog.findOneAndUpdate({_id:req.params.blogId, isDeleted: false},{isDeleted: true}))
+        if(!await blog.findOneAndUpdate({_id:req.params.blogId, isDeleted: false},{isDeleted: true, deletedAt: Date.now()}))
             return res.status(404).send({status: false,data: "No documents found to delete."})
         res.status(200).end()
     }
@@ -142,54 +152,33 @@ const deleteBlogs = async (req,res) => {
 
 const deleteBlogsQP = async (req,res) => {
     try{
-        /****************************************VALIDATION****************************************/
+        /***********************************VALIDATION****************************************/
         if(!Object.keys(req.query).length) 
             return res.status(400).send({status: false, msg: "Please select some filters for deletion."})
+        /**********************************Authorization Check********************************/
+        delete req.query.authorId
+        let id = req.headers['valid_author']
+        let tags; let subcategory;
 
-        let temp = await blog.find()
-        if(!temp.some(x => x.tags.includes(req.query.tags))) delete req.query.tags
-        if(!temp.some(x => x.subcategory.includes(req.query.subcategory))) delete req.query.subcategory
-        if(!temp.some(x => x.title == req.query.title)) delete req.query.title
-        if(!temp.some(x => x.body == req.query.body)) delete req.query.body
-        if(!temp.some(x => x.authorId == req.query.authorId)) delete req.query.authorId
-        if(!temp.some(x => x.category == req.query.category)) delete req.query.category
-        if(!Object.keys(req.query).length) 
-            return res.status(400).send({status: false, msg: "None of the tags have matching blog(s) to delete."})
-        /**************************************Authentication Check***********************************/
-        // req.query.isPublished = false
-        let findBlogs = await blog.find({$and: [req.query,{authorId: req.headers['valid_author']},{isPublished: false}]})//<---Authorization--->
-        // let findBlogs = (await blog.find(req.query)).filter(x => x.authorId == req.headers['valid_author'])
-        // line 161 - we can also use filter to get all blog datas of the logged in user
-        console.log(findBlogs)
-        if(!findBlogs.length) return res.status(404).send({status: false, msg: "No documents found to delete."})
-        /*********************************************************************************************/
-        let dBlogs = await blog.updateMany({_id:findBlogs},{$set:{isDeleted: true}})
-        let blogDeleted = await blog.find({_id:findBlogs, isDeleted: true, isPublished: false})
-        res.status(200).send({status:true, data: `Deleted blos count: ${dBlogs.modifiedCount}`})
+        if(req.query.tags)
+            tags = (req.query.tags.split(/[, '"+-;]+/)).map(x => x.trim()).map(x => {return {tags:x}})
+        if(req.query.subcategory)
+            subcategory = (req.query.subcategory.split(/[, '"+-;]+/)).map(x => x.trim()).map(x => {return {subcategory:x}})
+
+        let filter = [...tags||[],...subcategory||[],{title:req.query.title||''},{body:req.query.body||''}
+                        ,{category:req.query.category||''}]
+        /****************************************************************************************/
+        let blogs = await blog.updateMany({$or:filter, authorId:id, isDeleted:false, isPublished:false},
+                                            {isDeleted:true, deletedAt: Date.now()})
+        if(blogs.matchedCount == 0) 
+            return res.status(404).send({status:false, data: "No documents found."})
+        res.status(200).send({status: true, data: `Total deleted document count: ${blogs.modifiedCount}`});
     }
     catch(err){
-        console.log(err.message)
-        res.status(500).send({status: false, msg: err.message})
+        console.log(err)
+        res.status(500).send({status:false, msg: err.message})
     }
 }
 
-/**********************The below code can be used when authentication is not needed*********************/
-
-//deleteblogs by queryParams by Sandeep
-// const deleteBlogsQP = async (req,res) => {
-//     try{
-//         req.query.isPublished = false
-//         let blogs = await blog.updateMany(req.query,{$set:{isDeleted: true}})
-//         if(blogs.matchedCount == 0)
-//         return res.status(404).send({status: false,data: "No document found"})
-//         req.query.isDeleted = true
-//         let blogData = await blog.find(req.query)
-//         res.status(200).send({status:true, msg: blogData})
-//     }
-//     catch(err){
-//         console.log(err.message)
-//         res.status(500).send({status: false, msg: err.message})
-//     }
-// }
 
 module.exports = {createAuthor, createBlogs, getBlogs, updateBlogs, deleteBlogs, deleteBlogsQP}
