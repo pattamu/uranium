@@ -40,8 +40,6 @@ const generateAuthToken = (loginData) => {
                             {authorId:loginData._id,
                             authorName: `${loginData.fname}  ${loginData.lname}` },
                             'Which came first, The Egg or the Chicken ??!')
-    // res.setHeader("x-api-key", token)
-    // res.status(200).send({status: true, data: "Token Successfully sent to Header."});
     return token
 }
 
