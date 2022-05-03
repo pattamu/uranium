@@ -30,6 +30,7 @@ const createAuthor = async (req,res) => {
 const createBlogs = async (req,res) => {
     try{
         /*****************************************VALIDATION***********************************************/
+        console.log(req.userId)
         let data = req.body
         if(!Object.keys(data).length) 
             return res.status(400).send({status: false, msg: "You must enter data to create a Blog."})

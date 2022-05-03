@@ -45,8 +45,8 @@ const generateAuthToken = (loginData) => {
     return token
 }
 
-/*in authentication.js if line 10 is used then uncomment this below function & line 67 to generate token 
-and comment above function from line 38-46 & line 66*/
+/*in authentication.js if line 10 is used then uncomment this below function & line 73 to generate token 
+and comment above function from line 38-46 & line 72*/
 
 // authorSchema.methods.generateAuthToken = async function() {
 //     const User = this    
@@ -57,7 +57,13 @@ and comment above function from line 38-46 & line 66*/
 // }
 
 const decodeAuthToken = (token) => {   
-    return tokenValidity = jwt.verify(token, "Which came first, The Egg or the Chicken ??!")
+    let tokenValidity = jwt.verify(token, "Which came first, The Egg or the Chicken ??!",(err,data) => {
+    if(err)
+        return null
+    else {
+        return data
+    }})
+    return tokenValidity
 }
 
 const author = mongoose.model('Author', authorSchema) //authors
