@@ -5,7 +5,7 @@ const authorLogin = require("../controllers/authentication")
 const loginCheck = require("../middleware/authorisation")
 
 //Author-Blog route Handlers
-router.post("/author", controller.createAuthor)
+router.post("/authors", controller.createAuthor)
 router.post("/blogs", loginCheck, controller.createBlogs)
 router.get("/blogs", loginCheck, controller.getBlogs)
 router.put("/blogs/:blogId", loginCheck, controller.updateBlogs)

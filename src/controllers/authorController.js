@@ -26,12 +26,11 @@ const createAuthor = async (req,res) => {
     }
 }
 
+
 const createBlogs = async (req,res) => {
     try{
-        /*********************************VALIDATION*********************************/
+        /*****************************************VALIDATION***********************************************/
         let data = req.body
-        if(!Object.keys(data).length) 
-            return res.status(400).send({status: false, msg: "You must enter data."})
         if(!Object.keys(data).length) 
             return res.status(400).send({status: false, msg: "You must enter data to create a Blog."})
         if(!data.title)
@@ -45,19 +44,22 @@ const createBlogs = async (req,res) => {
         if(!mongoose.isValidObjectId(data.authorId))
         // if(!data.authorId.match(checkForHexRegExp = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i))
         // we can check ObjectId using this REGEX as well which is shown in line 46. comment line 45 and uncomment line 46 to check.
-            return res.send({status: false, msg: "Invalid Author ObjectId."})
+            return res.status(400).send({status: false, msg: "Invalid Author ObjectId."})
         if(!await author.findById(req.body.authorId)) 
             return res.status(400).send({status: false, msg: "AuthorId doesn't present in our DB."})
-        /****************************Authentication Check******************************/
+        if(req.body.tags.some(x => x.match(/[^_a-zA-Z]/)))
+            return res.status(400).send({status:false, msg: "INVALID!! Tag can't contain spaces/numbers/special_characters."})
+        if(req.body.subcategory.some(x => x.match(/[^_a-zA-Z]/)))
+            return res.status(400).send({status:false, msg: "INVALID!! Subcategory can't contain spaces/numbers/special_characters."})
+        /*****************************************Authentication Check*******************************************/
         if(req.headers['valid_author'] != data.authorId)
             return res.status(401).send({status: false, msg: "Enter your own AuthorId to create a blog."})
-        /*******************************************************************************/
+        /*******************************************************************************************************/
         data.tags = [...new Set(data.tags)]
         data.subcategory = [...new Set(data.subcategory)]
         if(data.isPublished)
             data.publishedAt = Date.now()
-        if(data.isDeleted)
-            data.deletedAt = Date.now()
+        
         if(await blog.exists(data)) 
             return res.status(400).send({status: false, msg: "Blog already present"})
         let created = await blog.create(data)
@@ -68,6 +70,7 @@ const createBlogs = async (req,res) => {
         res.status(500).send({status: false, msg: err.message})
     }
 }
+
 
 const getBlogs = async (req,res) => {
     try{
@@ -96,6 +99,7 @@ const getBlogs = async (req,res) => {
         res.status(500).send({status: false, msg: err.message})
     }
 }
+
 
 const updateBlogs = async (req,res) => {
     try{
@@ -129,6 +133,7 @@ const updateBlogs = async (req,res) => {
     }
 }
 
+
 const deleteBlogs = async (req,res) => {
     try{
         /*************************************VALIDATION*******************************************/
@@ -149,6 +154,7 @@ const deleteBlogs = async (req,res) => {
         res.status(500).send({status: false, msg: err.message})
     }
 }
+
 
 const deleteBlogsQP = async (req,res) => {
     try{
