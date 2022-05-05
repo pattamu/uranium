@@ -31,8 +31,6 @@ const createCollege = async (req,res)=> {
             return res.status(400).send({
                 status: false, 
                 msg: "Please Enter a valid college Short Name."})
-
-        data.name = data.name.toLowerCase()
         
         if(!isValid(data.fullName))
             return res.status(400).send({
@@ -46,20 +44,20 @@ const createCollege = async (req,res)=> {
         
         data.fullName = data.fullName.split(' ').map(x => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join(' ')
 
-        // if(!isValid(data.logoLink))
-        //     return res.status(400).send({
-        //         status: false, 
-        //         msg: "Please Enter the URL logoLink."})
+        if(data.logoLink && !isValid(data.logoLink))
+            return res.status(400).send({
+                status: false, 
+                msg: "Please Enter the URL logoLink."})
 
         if(data.logoLink && !urlRegEx.test(data.logoLink.trim()))
             return res.status(400).send({
                 status: false, 
                 msg: "Please Enter a valid URL for the logoLink."})
         
-        if(await collegeModel.exists(data))
+        if(await collegeModel.exists({name:data.name}))
             return res.status(400).send({
                 status:false,
-                msg: "This college details already exists in our Database."})
+                msg: "This college Short Name is taken. College details already exists in our Database."})
 
         let college = await collegeModel.create(data)
             res.status(201).send({
@@ -82,4 +80,4 @@ const createCollege = async (req,res)=> {
     }
 }
 
-module.exports = createCollege 
+module.exports = createCollege

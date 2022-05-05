@@ -46,8 +46,6 @@ const createIntern = async (req,res) => {
                 status: false,
                 msg: "Enter a Valid E-Mail Address."}) 
         
-        data.email = data.email.toLowerCase()
-
         if(!isValid(data.mobile))
             return res.status(400).send({
                 status: false,
