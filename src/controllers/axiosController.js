@@ -57,4 +57,33 @@ const getMemes = async (req, res) => {
     }
 }
 
-module.exports = {getVaccSessions, getWeatherdata, getMemes}
+
+const getBranch = async (req, res) => {
+    try{
+        let pin = req.params.pin
+        let fetch = {
+            method: 'get',
+            url: `https://api.postalpincode.in/pincode/${pin}`
+        }
+        let {data} = await axios(fetch)
+        res.status(200).send({data})
+    }catch(err){
+        res.status(500).send({msg: err.message})
+    }
+}
+
+const getPincode = async (req, res) => {
+    try{
+        let branch = req.params.branch
+        let fetch = {
+            method: 'get',
+            url: `https://api.postalpincode.in/postoffice/${branch}`
+        }
+        let {data} = await axios(fetch)
+        res.status(200).send({data})
+    }catch(err){
+        res.status(500).send({msg: err.message})
+    }
+}
+
+module.exports = {getVaccSessions, getWeatherdata, getMemes, getBranch, getPincode}
